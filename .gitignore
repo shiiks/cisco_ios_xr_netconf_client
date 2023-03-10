@@ -1,0 +1,8 @@
+Include
+Lib
+Scripts
+pyvenv.cfg
+app.log
+.env
+.idea
+.vs
