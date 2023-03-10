@@ -1,0 +1,14 @@
+<interfaces xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-um-interface-cfg">
+   <interface>
+        <interface-name>Loopback100</interface-name>
+    </interface>
+    <interface>
+        <interface-name>Loopback200</interface-name>
+    </interface>
+    <interface>
+        <interface-name>Loopback1000</interface-name>
+    </interface>
+    <interface>
+        <interface-name>Loopback1100</interface-name>
+    </interface>
+</interfaces>
