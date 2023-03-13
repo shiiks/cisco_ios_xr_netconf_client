@@ -12,7 +12,9 @@ import os
 from dotenv import load_dotenv
 from cachetools import cached, TTLCache
 from ncclient import manager, transport
+from ncclient.operations import RaiseMode
 import xmltodict
+import yaml
 
 load_dotenv()
 logging.basicConfig(filename='app.log', level=logging.DEBUG, filemode='w',
@@ -81,7 +83,57 @@ class IOSXR:
             }
         logging.info(interfaces)
         return interfaces
-            
+    
+    def update_interfaces(self, connection, config_file):
+        interfaces_to_update = []
+        try:
+            with open(config_file, 'r') as state_file:
+                configuration_state = yaml.safe_load(state_file)
+                for description, ipv4 in configuration_state["interfaces"].items():
+                    interfaces_to_update.append({
+                        "description": description,
+                        "ipv4": {
+                            "addresses": {
+                                "@xmlns": "http://cisco.com/ns/yang/Cisco-IOS-XR-um-if-ip-address-cfg", 
+                                "address": {
+                                    "address": ipv4['addresses']['address']['address'], 
+                                    "netmask": ipv4['addresses']['address']['netmask'],
+                                    },
+                                },
+                        },
+                    })
+                
+            configuration_parent = {
+                "config": {
+                    "interfaces": {
+                        "@xmlns": "http://cisco.com/ns/yang/Cisco-IOS-XR-um-if-ip-address-cfg",
+                        "interface": interfaces_to_update
+                    }
+                }
+            }
+                
+            xml_payload = xmltodict.unparse(configuration_parent)
+            with connection.locked(target="candidate"):
+                connection.raise_mode = RaiseMode.NONE
+                response = connection.edit_config(target="candidate", config=xml_payload)
+                validate = connection.validate(source="candidate")
+                connection.raise_mode = RaiseMode.ALL
+                
+                if response.ok and validate.ok:
+                    connection.commit()
+                else:
+                    connection.discard()
+        except json.decoder.JSONDecodeError as exception:
+            interfaces_error = {
+                "ERROR": f"JSONDecodeError occured while packing the  because {exception}"
+            }
+            logging.error(interfaces_error)
+        return interfaces_to_update
+                    
+                
+                
+        
+                
             
 if __name__ == "__main__":
     ios_xr_client = IOSXR()
@@ -94,4 +146,5 @@ if __name__ == "__main__":
         "allow_agent": False if os.getenv('ALLOW_AGENT') == 'False' else True,
         "look_for_keys": False if os.getenv('LOOK_FOR_KEYS') == 'False' else True
     }
-    ios_xr_client.get_configs(params)
+    #ios_xr_client.get_configs(params)
+    ios_xr_client.edit_configs(params)

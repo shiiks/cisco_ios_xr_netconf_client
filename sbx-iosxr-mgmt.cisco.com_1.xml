@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <interfaces xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-um-interface-cfg">
+   <interface>
+    <interface-name>Loopback200</interface-name>
+    <description>***MERGE LOOPBACK 200****</description>
+    <ipv4>
+     <addresses xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-um-if-ip-address-cfg">
+      <address>
+       <address>1.1.1.200</address>
+       <netmask>255.255.255.255</netmask>
+      </address>
+     </addresses>
+    </ipv4>
+   </interface>
+   <interface>
+    <interface-name>Loopback100</interface-name>
+    <description>***MERGE LOOPBACK 100****</description>
+    <ipv4>
+     <addresses xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-um-if-ip-address-cfg">
+      <address>
+       <address>1.1.1.100</address>
+       <netmask>255.255.255.255</netmask>
+      </address>
+     </addresses>
+    </ipv4>
+   </interface>
+  </interfaces>
+ </data>
