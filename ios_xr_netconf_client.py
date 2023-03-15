@@ -15,6 +15,8 @@ from ncclient import manager, transport
 from ncclient.operations import RaiseMode
 import xmltodict
 import yaml
+import gettext
+
 
 load_dotenv()
 logging.basicConfig(filename='app.log', level=logging.DEBUG, filemode='w',
@@ -22,6 +24,9 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG, filemode='w',
 
 class IOSXR:
     def __init__(self):
+        self.translations = gettext.translation('messages', localedir="locales", languages=[os.getenv('LANGUAGE')])
+        self.translations.install()
+        self._ = self.translations.gettext
         with open(os.getenv('FILTER_FILE'), 'r') as filter:
             self.filters = str(filter.read())
         
@@ -34,28 +39,33 @@ class IOSXR:
         try:
             interfaces = []
             with manager.connect(**params) as connection:
+                logging.info(connection)
                 context = connection.get_config(source='running', filter=('subtree', self.filters)).data_xml
                 with open("%s_1.xml" % params['host'], 'w') as file:
                     file.write(context)
                 interfaces = xmltodict.parse(context)
                 interfaces = interfaces['data']['interfaces']['interface']
-                logging.info("List of Interfaces found...")
+                logging.info(self._('list_of_interfaces'))
                 for interface in interfaces:
-                    logging.info(f"Name of the Interface: {interface['interface-name']}")
-                    logging.info(f"Description: {interface['description']}")
-                    logging.info(f"IPV4 Address: {interface['ipv4']['addresses']['address']['address']}")
-                    logging.info(f"IPV4 Netmask: {interface['ipv4']['addresses']['address']['netmask']}")
+                    logging.info(f"{self._('name_of_interface')}{interface['interface-name']}")
+                    logging.info(f"{self._('description')}{interface['description']}")
+                    logging.info(f"{self._('IPV4_address')}{interface['ipv4']['addresses']['address']['address']}")
+                    logging.info(f"{self._('IPV4_netmask')}{interface['ipv4']['addresses']['address']['netmask']}")
         except transport.errors.AuthenticationError as exception:
             interfaces = {
-                "ERROR": f"Authentication failed, please check the username and password and try again."
+                "ERROR": self._('AuthenticationError')
             }        
         except json.decoder.JSONDecodeError as exception:
             interfaces = {
-                "ERROR": f"JSONDecodeError occured while communicating to {url} because {exception}"
+                "ERROR": self._('JSONDecodeError').format(host=params['host'], exception=exception)
+            }
+        except transport.errors.SSHError as exception:
+            interfaces = {
+                "ERROR": self._('SSHError').format(host=params['host'], exception=exception)
             }
         except socket.gaierror as exception:
             interfaces = {
-                "ERROR": f"Socket error occured while communciation to the IOS XR host URL, please check the URL and try again."
+                "ERROR": self._('gaierror').format(host=params['host'], exception=exception)
             }
         logging.info(interfaces)
         return interfaces
@@ -68,18 +78,23 @@ class IOSXR:
         """
         try:
             with manager.connect(**params) as connection:
+                logging.info(connection)
                 response = update_interfaces(connection, 'state.yml')
         except transport.errors.AuthenticationError as exception:
             interfaces = {
-                "ERROR": f"Authentication failed, please check the username and password and try again."
+                "ERROR": self._('AuthenticationError')
             }        
         except json.decoder.JSONDecodeError as exception:
             interfaces = {
-                "ERROR": f"JSONDecodeError occured while communicating to {url} because {exception}"
+                "ERROR": self._('JSONDecodeError').format(host=params['host'], exception=exception)
+            }
+        except transport.errors.SSHError as exception:
+            interfaces = {
+                "ERROR": self._('SSHError').format(host=params['host'], exception=exception)
             }
         except socket.gaierror as exception:
             interfaces = {
-                "ERROR": f"Socket error occured while communciation to the IOS XR host URL, please check the URL and try again."
+                "ERROR": self._('gaierror').format(host=params['host'], exception=exception)
             }
         logging.info(interfaces)
         return interfaces
@@ -125,26 +140,23 @@ class IOSXR:
                     connection.discard()
         except json.decoder.JSONDecodeError as exception:
             interfaces_error = {
-                "ERROR": f"JSONDecodeError occured while packing the  because {exception}"
+                "ERROR": self._('JSONDecodeError').format(host=params['host'], exception=exception)
             }
             logging.error(interfaces_error)
-        return interfaces_to_update
-                    
-                
-                
-        
-                
+        return interfaces_to_update   
             
 if __name__ == "__main__":
     ios_xr_client = IOSXR()
     params = {
-        'host': os.getenv('HOST'),
-        'port': int(os.getenv('PORT')),
-        'username': os.getenv('USERNAME_IOS_XR'),
-        'password': os.getenv('PASSWORD'),
-        'hostkey_verify': False if os.getenv('HOSTKEY_VERIFY') == 'False' else True,
+        "host": os.getenv('HOST'),
+        "port": int(os.getenv('PORT')),
+        "username": os.getenv('USERNAME_IOS_XR'),
+        "password": os.getenv('PASSWORD'),
+        "hostkey_verify": False if os.getenv('HOSTKEY_VERIFY') == 'False' else True,
         "allow_agent": False if os.getenv('ALLOW_AGENT') == 'False' else True,
-        "look_for_keys": False if os.getenv('LOOK_FOR_KEYS') == 'False' else True
+        "look_for_keys": False if os.getenv('LOOK_FOR_KEYS') == 'False' else True,
+        "device_params": {"name": "iosxr"},
+        "manager_params": {"timeout": 6330}
     }
-    #ios_xr_client.get_configs(params)
+    ios_xr_client.get_configs(params)
     ios_xr_client.edit_configs(params)

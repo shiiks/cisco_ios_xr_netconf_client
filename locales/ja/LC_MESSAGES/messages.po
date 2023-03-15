@@ -1,0 +1,37 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ios_xr_netconf_client 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-14 10:00-0400\n"
+"PO-Revision-Date: 2023-03-15 10:00-0400\n"
+"Last-Translator: SHIKHAR SARAN SRIVASTAVA <shikhar.447@rediffmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "list_of_interfaces"
+msgstr "インタフェースのリストが見つかりました..."
+
+msgid "name_of_interface"
+msgstr "インタフェース名："
+
+msgid "description"
+msgstr "説明："
+
+msgid "IPV4_address"
+msgstr "IPv4アドレス："
+
+msgid "IPV4_netmask"
+msgstr "IPv4ネットマスク："
+
+msgid "AuthenticationError"
+msgstr "認証に失敗しました。ユーザー名とパスワードを確認して、再度お試しください。"
+
+msgid "JSONDecodeError"
+msgstr "{host}に接続中にJSONDecodeErrorが発生しました：{exception}"
+
+msgid "SSHError"
+msgstr "{host}に接続中にエラーが発生しました：{exception}"
+
+msgid "gaierror"
+msgstr "{host}に接続中にソケットエラーが発生しました。URLを確認して、再度お試しください。"
