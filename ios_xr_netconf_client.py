@@ -70,34 +70,6 @@ class IOSXR:
         logging.info(interfaces)
         return interfaces
     
-    def edit_configs(self, params):
-        """
-        This function edits the list of interfaces by reading a subset from a yaml file for the IOS XR devices.
-        :param: params: The parameters needed to make connection to the IOS XR router device.
-        :return: List of interfaces if found else returns empty list.
-        """
-        try:
-            with manager.connect(**params) as connection:
-                logging.info(connection)
-                response = update_interfaces(connection, 'state.yml')
-        except transport.errors.AuthenticationError as exception:
-            interfaces = {
-                "ERROR": self._('AuthenticationError')
-            }        
-        except json.decoder.JSONDecodeError as exception:
-            interfaces = {
-                "ERROR": self._('JSONDecodeError').format(host=params['host'], exception=exception)
-            }
-        except transport.errors.SSHError as exception:
-            interfaces = {
-                "ERROR": self._('SSHError').format(host=params['host'], exception=exception)
-            }
-        except socket.gaierror as exception:
-            interfaces = {
-                "ERROR": self._('gaierror').format(host=params['host'], exception=exception)
-            }
-        logging.info(interfaces)
-        return interfaces
     
     def update_interfaces(self, connection, config_file):
         interfaces_to_update = []
@@ -143,8 +115,39 @@ class IOSXR:
                 "ERROR": self._('JSONDecodeError').format(host=params['host'], exception=exception)
             }
             logging.error(interfaces_error)
-        return interfaces_to_update   
-            
+        return interfaces_to_update
+    
+    
+    def edit_configs(self, params):
+        """
+        This function edits the list of interfaces by reading a subset from a yaml file for the IOS XR devices.
+        :param: params: The parameters needed to make connection to the IOS XR router device.
+        :return: List of interfaces if found else returns empty list.
+        """
+        try:
+            with manager.connect(**params) as connection:
+                logging.info(connection)
+                response = self.update_interfaces(connection, 'state.yml')
+        except transport.errors.AuthenticationError as exception:
+            interfaces = {
+                "ERROR": self._('AuthenticationError')
+            }        
+        except json.decoder.JSONDecodeError as exception:
+            interfaces = {
+                "ERROR": self._('JSONDecodeError').format(host=params['host'], exception=exception)
+            }
+        except transport.errors.SSHError as exception:
+            interfaces = {
+                "ERROR": self._('SSHError').format(host=params['host'], exception=exception)
+            }
+        except socket.gaierror as exception:
+            interfaces = {
+                "ERROR": self._('gaierror').format(host=params['host'], exception=exception)
+            }
+        logging.info(interfaces)
+        return interfaces
+    
+    
 if __name__ == "__main__":
     ios_xr_client = IOSXR()
     params = {
