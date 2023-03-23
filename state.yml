@@ -1,0 +1,22 @@
+interfaces:
+  loopback101:
+    description: "A loopback101 interface"
+    ipv4:
+      addresses:
+        address:
+          address: 1.1.1.210
+          netmask: 255.255.255.255
+  loopback401:
+    description: "A loopback401 interface"
+    ipv4:
+      addresses:
+        address:
+          address: 1.1.1.211
+          netmask: 255.255.255.255
+  loopback701:
+    description: "A loopback701 interface"
+    ipv4:
+      addresses:
+        address:
+          address: 1.1.1.212
+          netmask: 255.255.255.255
